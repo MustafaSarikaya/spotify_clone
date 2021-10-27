@@ -26,5 +26,7 @@ if(isset($_POST['register_button'])){
     $email_confirm = sanitizeString($_POST['confirm_email']);
     $password = sanitizePassword($_POST['password']);
     $password_confirm = sanitizePassword($_POST['confirm_password']);
+
+
 }
 
