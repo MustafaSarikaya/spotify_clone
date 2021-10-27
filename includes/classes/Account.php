@@ -11,6 +11,20 @@ class Account{
         $this->validatePassword($pw, $pw2);
         $this->validateFirstName($fn);
         $this->validateLastName($sn);
+
+        if(empty($this->errorArray)){
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    public function getError($error){
+        if(!in_array($error, $this->errorArray)){
+            $error = "";
+        }
+        return "<span class='errorMessage'>$error</span>";
     }
 
     private function validateUsername($username){
@@ -28,7 +42,7 @@ class Account{
         }
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL) ){
-            array_push($this->errorArray, "Emails is invalid");
+            array_push($this->errorArray, "Email is invalid");
         }
     }
 

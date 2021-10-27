@@ -27,6 +27,7 @@ if(isset($_POST['register_button'])){
     $password = sanitizePassword($_POST['password']);
     $password_confirm = sanitizePassword($_POST['confirm_password']);
 
+    $wasSuccessful = $account->register($username, $firstName, $lastName, $email, $email_confirm, $password, $password_confirm);
 
 }
 
