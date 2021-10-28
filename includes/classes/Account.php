@@ -1,18 +1,22 @@
 <?php
+//
+//namespace includes\classes;
+
 class Account{
 
-    public function __constructor(){
+    private $errorArray;
+    private $con;
+
+    public function __construct($con){
         $this->errorArray = array();
+        $this->con = $con;
     }
 
-    public function register($un, $em, $em2, $pw, $pw2, $fn, $sn){
-        $this->validateUsername($un);
-        $this->validateEmail($em,$em2);
-        $this->validatePassword($pw, $pw2);
-        $this->validateFirstName($fn);
-        $this->validateLastName($sn);
+    public function login($un, $pw) {
+        $pw = md5($pw);
 
-        if(empty($this->errorArray)){
+        $query = mysqli_query($this->con, "SELECT * FROM users WHERE username = '$un' AND password = '$pw'");
+        if (mysqli_num_rows($query) == 1) {
             return true;
         }
         else {
@@ -20,11 +24,33 @@ class Account{
         }
     }
 
+    public function register($un, $em, $em2, $pw,$pw2, $fn, $ln){
+        $this->validateUsername($un);
+        $this->validateEmail($em,em2);
+        $this->validatePassword($pw, pw2);
+        $this->validateFirstName($fn);
+        $this->validateLastName($ln);
+
+        if(empty($this->errorArray)){
+            return $this->insertUserDetails($un, $em, $pw, $fn, $ln);
+        }
+        else {
+            return false;
+        }
+    }
+
     public function getError($error){
-        if(!in_array($error, $this->errorArray)){
-            $error = "";
+        if(!in_array($error,$this->errorArray)){
+           $error = "";
         }
         return "<span class='errorMessage'>$error</span>";
+    }
+
+    private function insertUserDetails($un, $em, $pw, $fn, $ln) {
+        $encriptedPw = md5($pw);
+        $profilePic = "assests/images/profile-pics/head_emerald.png";
+        $date = date("Y-m-d");
+        return mysqli_query($this->con, "INSERT INTO users VALUES ('', '$un','$em', '$pw', '$fn', '$ln')");
     }
 
     private function validateUsername($username){
@@ -34,6 +60,11 @@ class Account{
         }
 
         //TODO check is username already exists
+        $checkUsernameQuery = mysqli_query($this->con, "SELECT username FROM users WHERE username='$username'");
+        if(mysqli_num_rows($checkUsernameQuery) != 0) {
+            array_push($this->errorArray, "This username already exists");
+            return;
+        }
     }
 
     private function validateEmail($email, $email_confirm){
@@ -44,6 +75,12 @@ class Account{
         if (!filter_var($email, FILTER_VALIDATE_EMAIL) ){
             array_push($this->errorArray, "Email is invalid");
         }
+
+        $checkEmailQuery = mysqli_query($this->con, "SELECT email FROM users WHERE username='$email'");
+        if(mysqli_num_rows($checkEmailQuery) != 0) {
+            array_push($this->errorArray, "This email already in use");
+            return;
+        }
     }
 
     private function validatePassword($password, $password_confirm ){
@@ -53,6 +90,11 @@ class Account{
 
         if (preg_match('/[^A-Za-z0-9]/', $password)) {
             array_push($this->errorArray, "Passwords must contain characters A-z and digits 0-9");
+        }
+
+        if(strlen($password) > 30 || strlen($password) < 5) {
+            array_push($this->errorArray, "Password must be between 5 and 30 characters");
+            return;
         }
     }
 
@@ -69,5 +111,7 @@ class Account{
             return;
         }
     }
+
+
 
 }
